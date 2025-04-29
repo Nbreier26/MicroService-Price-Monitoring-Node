@@ -52,19 +52,19 @@ async function startConsumer() {
           });
           await newPriceHistory.save();
 
-          const alertMsg = {
-              productId: product.id,
-              oldPrice: product.price,
-              newPrice: product.price,
-              percentageChange: percentageDifference.toFixed(2),
-              message: `Alerta de preço para ${product.name}: ${percentageDifference.toFixed(2)}% de variação`
-            };
-          //bypass para sempre acionar o notificação para teste
-          channel.sendToQueue(
-            'price_alert_queue',
-            Buffer.from(JSON.stringify(alertMsg)),
-            { persistent: true }
-          );
+          // const alertMsg = {
+          //     productId: product.id,
+          //     oldPrice: product.price,
+          //     newPrice: product.price,
+          //     percentageChange: percentageDifference.toFixed(2),
+          //     message: `Alerta de preço para ${product.name}: ${percentageDifference.toFixed(2)}% de variação`
+          //   };
+          // //bypass para sempre acionar o notificação para teste
+          // channel.sendToQueue(
+          //   'price_alert_queue',
+          //   Buffer.from(JSON.stringify(alertMsg)),
+          //   { persistent: true }
+          // );
 
           if (shouldAlert) {
             const alertMsg = {
