@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api
+    container_name: api
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/api
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - mongo
+      - rabbitmq
+    volumes:
+      - ./api:/app
+    networks:
+      - product-monitoring-network
+    ports:
+      - "3000:3000"
+    entrypoint: ["./wait-for-it.sh", "mongo:27017", "--", "./wait-for-it.sh", "rabbitmq:5672", "--", "npm", "start"]
+
+  price-monitor:
+    build:
+      context: ./monitoring
+    container_name: price-monitor
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/monitoring
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - mongo
+      - rabbitmq
+      - api
+    volumes:
+      - ./monitoring:/app
+    networks:
+      - product-monitoring-network
+    ports:
+      - "3001:3001"
+    entrypoint: ["./wait-for-it.sh", "mongo:27017", "--", "./wait-for-it.sh", "rabbitmq:5672", "--", "npm", "start"]
+
+  notification:
+    build:
+      context: ./notification
+    container_name: notification
+    depends_on:
+      - mongo
+      - rabbitmq
+      - api
+    volumes:
+      - ./notification:/app
+    networks:
+      - product-monitoring-network
+    entrypoint: ["./wait-for-it.sh", "mongo:27017", "--", "./wait-for-it.sh", "rabbitmq:5672", "--", "npm", "start"]
+
+  history:
+    build:
+      context: ./history
+    container_name: history
+    depends_on:
+      - mongo
+      - rabbitmq
+      - api
+    volumes:
+      - ./history:/app
+    networks:
+      - product-monitoring-network
+    entrypoint: ["./wait-for-it.sh", "mongo:27017", "--", "./wait-for-it.sh", "rabbitmq:5672", "--", "npm", "start"]
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - product-monitoring-network
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping')"]
+      interval: 30s
+      retries: 5
+      start_period: 5s
+      timeout: 10s
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    logging:
+      driver: "none"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - product-monitoring-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      retries: 5
+      start_period: 5s
+      timeout: 10s
+
+volumes:
+  mongo_data:
+
+networks:
+  product-monitoring-network:
+    driver: bridge

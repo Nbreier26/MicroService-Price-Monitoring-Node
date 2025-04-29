@@ -1,0 +1,12 @@
+{
+  "name": "notification",
+  "version": "1.0.0",
+  "description": "Microsserviço de Notificação para alertas de preço",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3"
+  }
+}

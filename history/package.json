@@ -1,0 +1,13 @@
+{
+  "name": "history",
+  "version": "1.0.0",
+  "description": "Microsserviço de Histórico de Preços",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "mongoose": "^7.0.0"
+  }
+}
